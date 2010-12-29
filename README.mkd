@@ -5,3 +5,50 @@ environment which can be used for running untrusted commands safely in it.
 Sandbox is based on debootstrap and sudo.
 
 [sandbox]: http://en.wikipedia.org/wiki/Sandbox_(computer_security)
+
+Requirements
+------------
+Sandbox runs only on Linux, and a Debian-based system is recommended.  It needs
+following packages to run:
+
+ * debootstrap
+ * mksquahsfs
+ * sudo
+ * vim
+
+
+Installation
+------------
+First, edit following files to meet your needs:
+
+ * `config.source`: URL for the APT repository you want to use
+ * `config.suite`: Name of the distribution suite you are going to use
+ * `config.packages`: Names of packages you need in your sandbox
+ * `config.files`: Additional files that needs to be copied into your sandbox
+
+Then, run the initialization command:
+
+    ./init
+
+If everything went OK, there will be a `root.squashfs` file which is your
+filesystem image for your sandbox.
+
+
+Usage
+-----
+Once your sandbox image is prepared, you can simply run unsafe commands like
+this with some data:
+
+    sudo ./run-safely /home/netj/quarantine untrusted-command argument arg2 arg3 ...
+
+It will automatically mount the sandbox image read-only, bind the given
+working directory into it, and run the given command inside it being chroot'ed.
+
+If you need to move things around or want to clean up, simply run:
+
+    ./stop
+
+You can manually prepare the sandbox environment by running:
+
+    ./start
+
