@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# start -- start the prepared sandbox environment
+# Usage: start
+#
+# Author: Jaeho Shin <netj@sparcs.org>
+# Created: 2010-12-29
+set -eu
+Self=`readlink -f "$0"`
+Here=`dirname "$Self"`
+
+cd "$Here"
+
+if [ -e root.squashfs ]; then
+    mkdir -p root
+    mountpoint -q root      || sudo mount -t squashfs -o ro,loop root.squashfs root
+    mountpoint -q root/proc || sudo mount -t proc  proc root/proc
+    mountpoint -q root/sys  || sudo mount -t sysfs none root/sys
+    mkdir -p run
+else
+    echo >&2 "ERROR:" "sandbox not initialized"
+    false
+fi

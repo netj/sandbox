@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -eu
+
+Root=$1; shift
+[ $# -gt 0 ]
+
+read-config "$@" |
+while read recipe; do
+    eval "set -- $recipe"
+    dest="$Root/${1#/}"; shift
+    dest="'${dest//"'"/"'\''"}'"
+    echo "sudo mkdir -p $dest"
+    echo -n "sudo cp -a -t $dest"
+    for f; do
+        echo -n " '${f//"'"/"'\''"}'"
+    done
+    echo
+done |
+$SHELL -x

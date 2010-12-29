@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# stop -- stop the started sandbox environment
+# Usage: stop
+#
+# Author: Jaeho Shin <netj@sparcs.org>
+# Created: 2010-12-29
+set -eu
+Self=`readlink -f "$0"`
+Here=`dirname "$Self"`
+
+cd "$Here"
+
+if [ -d run ] || mountpoint -q root; then
+    set +e
+    rmdir run
+    sudo umount -l root/proc
+    sudo umount -l root/sys
+    sudo umount -l root
+    rmdir root
+fi

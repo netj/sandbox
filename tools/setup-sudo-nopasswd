@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -eu
+
+Sandbox=$1; shift
+
+# insert NOPASSWD lines into sudoers, e.g.
+#   netj ALL=(root) NOPASSWD: /*, /home/netj/rosaec-clinic/test/sample-clinic/sandbox/run-safely
+sudoerline="$LOGNAME ALL=(root) NOPASSWD: /*, $Sandbox/run-safely"
+markerline="# auto-inserted for $Sandbox"
+if ! sudo cat /etc/sudoers | grep -q "$markerline$"; then
+    tmp=`mktemp /tmp/clinic-init.XXXXXX`
+    echo "$sudoerline	$markerline" >$tmp
+    sudo env EDITOR="vim + +r$tmp +wq" visudo
+fi

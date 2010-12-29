@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# run-safely -- run given command under given working directory in this sandbox
+# Usage: sudo run-safely WORKINGDIR COMMAND [ARGUMENT...]
+#
+# Author: Jaeho Shin <netj@ropas.snu.ac.kr>
+# Created: 2010-12-16
+set -eu
+
+[ $# -gt 1 -a x"$LOGNAME" = x"root" -a -n "${SUDO_USER:-}" ] ||
+    { sed -n '2,/^#$/ s/^# //p' <"$0"; exit 1; }
+
+WorkingDir=$1; shift
+WorkingDir=`readlink -f "$WorkingDir"`
+
+export LC_ALL=C
+
+Self=`readlink -f "$0"`
+Here=`dirname "$Self"`
+
+cd "$Here"
+
+if ! [ -d run ]; then
+    ./start
+    #echo >&2 "ERROR:" "sandbox not started: run \`make start' first"
+    #false
+fi
+
+# prepare a root for this session
+session=`mktemp -d run/XXXXXX`
+trap "sudo umount -l $session; rmdir $session" EXIT
+sudo mount --bind root $session
+
+# mount given working directory in it
+trap "sudo umount -l $session/sandbox $session; rmdir $session" EXIT
+sudo mount --bind "$WorkingDir" $session/sandbox
+
+# run given command being chroot'ed in this session dir
+sudo chroot $session \
+sudo -i -u $SUDO_USER \
+"$@"

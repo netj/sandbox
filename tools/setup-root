@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -eu
+
+Root=$1; shift
+
+export LC_ALL=C
+
+# install sudo
+manage-packages install $Root sudo
+
+# add current user with same name and uid
+sudo chroot $Root </dev/null \
+    adduser $LOGNAME \
+    --uid `id -u` \
+    --disabled-password \
+    --force-badname \
+    --ingroup users \
+    --home /sandbox \
+    --quiet \
+    || true
+
+# create a directory where we'll run sandboxed commands
+sudo mkdir -p $Root/sandbox

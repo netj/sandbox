@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+set -eu
+
+Cmd=$1; shift
+Root=$1; shift
+
+export LC_ALL=C
+
+# mount system's apt cache
+sudo mount --bind /var/cache/apt/archives $Root/var/cache/apt/archives
+trap "sudo umount $Root/var/cache/apt/archives" EXIT
+
+run-inside() { sudo chroot $Root "$@"; }
+apt-get-inside() { run-inside apt-get --force-yes -y "$@"; }
+
+case $Cmd in
+    install)
+        # install given packages
+        try() { apt-get-inside install "$@"; }
+        ;;
+    update)
+        # update and upgrade
+        try() {
+            apt-get-inside update
+            apt-get-inside upgrade
+        }
+        ;;
+esac
+
+if ! try "$@"; then
+    # dpkg can get broken when apt-get gets interrupted by ^C
+    run-inside dpkg --configure -a
+    try "$@"
+fi

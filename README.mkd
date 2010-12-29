@@ -1,0 +1,7 @@
+Sandbox
+=======
+A simple toolchain for creating and managing a "[sandbox][]", i.e. a chrooted
+environment which can be used for running untrusted commands safely in it.
+Sandbox is based on debootstrap and sudo.
+
+[sandbox]: http://en.wikipedia.org/wiki/Sandbox_(computer_security)

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+cat 2>/dev/null "$@" |
+sed 's/#.*$//' |
+grep -v '^ *$'

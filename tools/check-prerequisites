@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -eu
+
+error() {
+    echo >&2 "ERROR:" "$@"
+    false
+}
+
+[ `uname` = Linux ] ||
+    error "sandbox depends heavily on Linux's mount --bind, -o loop"
+
+type >/dev/null debootstrap mksquashfs sudo vim ||
+    {
+        error "sandbox requires some packages, install them by running:"
+        pkgs=(
+        debootstrap
+        mksquahsfs
+        sudo
+        vim
+        )
+        error "  sudo apt-get install ${pkgs[@]}"
+    }

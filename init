@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# init -- prepare a sandbox environment according to configs
+# Usage: init
+#
+# Author: Jaeho Shin <netj@sparcs.org>
+# Created: 2010-12-29
+set -eu
+Self=`readlink -f "$0"`
+Here=`dirname "$Self"`
+
+PATH="$Here/tools:$PATH"
+check-prerequisites
+
+set -x
+cd "$Here"
+
+if ! [ -d build/root -a -e build/.created ]; then
+    create-root build/root "`read-config config.source`" "`read-config config.suite`"
+    touch build/.created
+fi
+
+setup-root build/root
+manage-packages install build/root `read-config config.packages`
+copy-files build/root config.files
+
+sudo mksquashfs build/root build/root.squashfs -noappend
+sudo chmod a=,u=r build/root.squashfs
+mv -f build/root.squashfs .
+
+setup-sudo-nopasswd "$Here"

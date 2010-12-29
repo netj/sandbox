@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -eu
+
+Root=$1; shift
+Source=$1; shift
+Suite=${1:-}
+
+export LC_ALL=C
+
+# check prerequisites
+if ! type debootstrap &>/dev/null; then
+    echo "debootstrap not available" >&2
+    false
+fi
+
+# mount system's apt cache
+mkdir -p $Root/var/cache/apt/archives
+sudo mount --bind /var/cache/apt/archives $Root/var/cache/apt/archives
+trap "sudo umount $Root/var/cache/apt/archives" EXIT
+
+# use debootstrap to create chroot-able space
+sudo debootstrap --verbose $Suite $Root $Source
